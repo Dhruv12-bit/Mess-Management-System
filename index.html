@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Mess Management System</title>
+<meta name="theme-color" content="#4f46e5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mess App">
+<link rel="manifest" href="/manifest.json">
+<style>
+/* INDIGO SAAS COLOR PALETTE */
+:root {
+  --bg: #f8fafc; /* Clean slate background */
+  --card: #ffffff;
+  --tx: #0f172a;
+  --mut: #64748b;
+  --bd: #e2e8f0;
+  --pri: #4f46e5; /* Professional Indigo */
+  --pri-hov: #4338ca;
+  --on: #ffffff;
+  --red: #ef4444;
+  --redbg: #fee2e2;
+  --grn: #10b981;
+  --grnbg: #d1fae5;
+}
+
+/* DARK MODE SUPPORT */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a; 
+    --card: #1e293b;
+    --tx: #f8fafc;
+    --mut: #94a3b8;
+    --bd: #334155;
+    --pri: #6366f1;
+    --red: #f87171;
+    --redbg: #450a0a;
+    --grn: #34d399;
+    --grnbg: #064e3b;
+  }
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: system-ui, -apple-system, sans-serif; }
+html, body { margin: 0; height: 100%; }
+body { color: var(--tx); background-color: var(--bg); padding-bottom: 80px; max-width: 600px; margin: 0 auto; position: relative; }
+
+/* MODERN DOT-GRID BACKGROUND */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(var(--pri) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.07;
+  z-index: -1;
+}
+
+header { position: sticky; top: 0; background: var(--card); padding: 12px 16px; border-bottom: 1px solid var(--bd); z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; }
+h1 { font-size: 19px; margin: 0; color: var(--pri); display: flex; align-items: center; gap: 8px; font-weight: 700; }
+button { font: inherit; cursor: pointer; border: 0; border-radius: 12px; padding: 10px 16px; font-weight: 600; transition: transform 0.1s; }
+button:active { transform: scale(0.97); }
+button.p { background: var(--pri); color: var(--on); }
+button.g { background: transparent; color: var(--tx); padding: 8px; border: 1px solid var(--bd); }
+button.wa { background: #25D366; color: #fff; }
+button.out { background: transparent; border: none; color: var(--mut); padding: 8px; }
+
+/* TABS NAVIGATION */
+.nav-tabs { display: flex; background: var(--card); padding: 8px; gap: 8px; border-bottom: 1px solid var(--bd); position: sticky; top: 57px; z-index: 9; }
+.nav-tabs button { flex: 1; padding: 10px 4px; background: transparent; color: var(--mut); font-size: 14px; border-radius: 8px; }
+.nav-tabs button.active { background: var(--pri); color: var(--on); }
+
+/* VIEWS */
+.view { display: none; padding: 16px; }
+.view.active { display: block; }
+
+/* CARDS & LISTS */
+.card { background: var(--card); border: 1px solid var(--bd); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+.flex-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+.nm { font-weight: 700; font-size: 16px; }
+.sub { color: var(--mut); font-size: 13px; margin-top: 2px; }
+
+/* ATTENDANCE TOGGLES */
+.meal-toggles { display: flex; gap: 8px; margin-top: 12px; }
+.meal-btn { flex: 1; padding: 12px; border: 2px solid var(--bd); background: transparent; color: var(--mut); border-radius: 12px; font-size: 15px; display: flex; justify-content: center; gap: 6px; align-items: center; }
+.meal-btn.on { background: var(--grnbg); border-color: var(--grn); color: var(--grn); }
+
+/* CONTROLS */
+input, select, textarea { width: 100%; font: inherit; padding: 12px; border-radius: 10px; border: 1px solid var(--bd); background: var(--bg); color: var(--tx); margin: 6px 0 16px; }
+label { font-size: 13px; font-weight: 600; color: var(--mut); text-transform: uppercase; letter-spacing: 0.5px; }
+.fab { position: fixed; right: 20px; bottom: 20px; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4); border-radius: 99px; padding: 16px 24px; font-size: 16px; z-index: 20; }
+.chip { padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.chip.paid { background: var(--grnbg); color: var(--grn); }
+.chip.unpaid { background: var(--redbg); color: var(--red); }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; text-align: center; }
+.stats div { background: var(--card); padding: 12px 4px; border-radius: 12px; border: 1px solid var(--bd); }
+.stats b { display: block; font-size: 20px; color: var(--pri); }
+.stats small { font-size: 11px; color: var(--mut); text-transform: uppercase; letter-spacing: 0.5px; }
+
+dialog { border: 0; border-radius: 20px; background: var(--card); color: var(--tx); width: min(92vw, 400px); padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+dialog::backdrop { background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
+dialog h2 { margin: 0 0 16px; font-size: 20px; }
+.dialog-acts { display: flex; gap: 8px; margin-top: 8px; }
+.dialog-acts button { flex: 1; }
+
+#login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; padding: 20px; }
+#login-container h1 { font-size: 28px; margin-bottom: 8px; color: var(--pri); }
+.tip { font-size: 12px; color: var(--mut); text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-container" style="display: none;">
+  <h1>🍽️ Mess Management</h1>
+  <p style="color: var(--mut); margin-bottom: 30px;">Owner Dashboard</p>
+  <button id="btnLogin" class="p" style="padding: 16px 32px; font-size: 18px; border-radius: 99px;">Sign in with Google</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-container" style="display: none;">
+  <header>
+    <h1>🍽️ <span id="hdrName">My Mess</span></h1>
+    <div style="display:flex; gap:8px;">
+      <button class="g" id="btnExport" title="Export Data">📥 CSV</button>
+      <button class="g" id="btnSettings" title="Settings">⚙️</button>
+      <button class="out" id="btnLogout">🚪</button>
+    </div>
+  </header>
+
+  <div class="nav-tabs" id="navTabs">
+    <button class="active" data-view="attendance">📅 Attendance</button>
+    <button data-view="students">👥 Students</button>
+    <button data-view="payments">💰 Payments</button>
+  </div>
+
+  <!-- VIEW: ATTENDANCE -->
+  <div id="view-attendance" class="view active">
+    <input type="date" id="attDate">
+    <div class="stats" id="attStats"></div>
+    <div id="attList"></div>
+  </div>
+
+  <!-- VIEW: STUDENTS -->
+  <div id="view-students" class="view">
+    <div id="stuList"></div>
+    <button class="p fab" id="btnAddStudent">+ Add Student</button>
+  </div>
+
+  <!-- VIEW: PAYMENTS -->
+  <div id="view-payments" class="view">
+    <input type="month" id="payMonth">
+    <button class="wa" id="btnRemindAll" style="width: 100%; margin-bottom: 16px; padding: 14px;">📲 Remind All Unpaid</button>
+    <div id="payList"></div>
+  </div>
+
+  <p class="tip" id="syncTip">Data is synced to the cloud.</p>
+
+  <!-- DIALOG: ADD/EDIT STUDENT -->
+  <dialog id="dStudent">
+    <h2 id="sT">Add Student</h2>
+    <label>Full Name</label>
+    <input id="sName" type="text" placeholder="e.g. Rahul Sharma">
+    <label>WhatsApp Number (10 digits)</label>
+    <input id="sPhone" type="tel" placeholder="9876543210">
+    <div class="dialog-acts">
+      <button id="sDel" class="g" style="color:var(--red); border-color:var(--red);">Delete</button>
+      <button id="sCan" class="g">Cancel</button>
+      <button id="sSave" class="p">Save</button>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: SETTINGS -->
+  <dialog id="dSettings">
+    <h2>Mess Settings</h2>
+    <label>Mess Name</label>
+    <input id="setMess" type="text" placeholder="e.g. Royal Mess">
+    <label>Fixed Monthly Fee (₹)</label>
+    <input id="setFee" type="number">
+    <label>WhatsApp Template</label>
+    <textarea id="setTpl" rows="4"></textarea>
+    <p style="font-size:11px; color:var(--mut); margin-top:-10px;">Use {name}, {mess}, {month}, {fee}</p>
+    <div class="dialog-acts">
+      <button id="setCan" class="g">Cancel</button>
+      <button id="setSave" class="p">Save</button>
+    </div>
+  </dialog>
+</div>
+
+<!-- FIREBASE & LOGIC -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+  // FIREBASE CONFIG - MUST MATCH YOUR SETUP
+  const firebaseConfig = {
+    apiKey: "AIzaSyBb4QY0hPwEPxo0OBcHWugKPznzfBSmF1M",
+    authDomain: "samarth-pg.firebaseapp.com",
+    projectId: "samarth-pg",
+    storageBucket: "samarth-pg.firebasestorage.app",
+    messagingSenderId: "427890519216",
+    appId: "1:427890519216:web:949e3fc6b2f204a71fdf75",
+    measurementId: "G-9WEBV19MM6"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  let currentUser = null;
+  const $ = id => document.getElementById(id);
+  
+  const KEY = 'mess_system_data_v1';
+  const DEF = {
+    mess: 'My Mess',
+    fee: 3500,
+    tpl: 'Namaste {name}, this is a reminder from {mess}. Your mess fee for {month} (₹{fee}) is pending. Please pay at the earliest. Thank you!',
+    students: [],
+    att: {}, // { "YYYY-MM-DD": { stuId: {l: true, d: false} } }
+    pay: {}  // { "YYYY-MM": { stuId: true } }
+  };
+  let S = JSON.parse(JSON.stringify(DEF));
+  
+  let currentView = 'attendance';
+  let editId = null;
+
+  // Set default dates
+  const today = new Date();
+  $('attDate').value = today.toISOString().split('T')[0];
+  $('payMonth').value = today.toISOString().slice(0, 7);
+
+  // CLOUD SYNC
+  async function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){}
+    if(currentUser) {
+      try {
+        await setDoc(doc(db, "users", currentUser.uid), S);
+        $('syncTip').textContent = "Cloud sync successful ✓";
+      } catch(e) {
+        $('syncTip').textContent = "Offline - Saved to device";
+      }
+    }
+    render();
+  }
+
+  // AUTHENTICATION
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      $('login-container').style.display = 'none';
+      $('app-container').style.display = 'block';
+      $('syncTip').textContent = "Verifying access...";
+
+      // VIP ALLOWLIST CHECK (Reads from Firestore 'allowed_emails' collection)
+      try {
+        const whitelistRef = doc(db, "allowed_emails", user.email.toLowerCase());
+        const whitelistSnap = await getDoc(whitelistRef);
+        if (!whitelistSnap.exists()) {
+          alert("Access Denied: " + user.email + " has not purchased access. Contact owner.");
+          await signOut(auth);
+          return;
+        }
+      } catch (err) {
+        alert("Verification failed. Make sure Firestore rules allow reading 'allowed_emails'.");
+        await signOut(auth);
+        return;
+      }
+
+      currentUser = user;
+      $('syncTip').textContent = "Syncing data...";
+
+      try {
+        const docSnap = await getDoc(doc(db, "users", user.uid));
+        if (docSnap.exists()) {
+          S = { ...DEF, ...docSnap.data() };
+        } else {
+          try { let local = JSON.parse(localStorage.getItem(KEY)); if(local) S = { ...DEF, ...local }; } catch(e){}
+          save(); 
+        }
+      } catch(error) {
+        try { let local = JSON.parse(localStorage.getItem(KEY)); if(local) S = { ...DEF, ...local }; } catch(e){}
+      }
+      render();
+    } else {
+      currentUser = null;
+      $('login-container').style.display = 'flex';
+      $('app-container').style.display = 'none';
+    }
+  });
+
+  $('btnLogin').onclick = () => { signInWithPopup(auth, provider).catch(err => alert("Error: " + err.message)); };
+  $('btnLogout').onclick = () => signOut(auth);
+
+  // NAVIGATION
+  $('navTabs').onclick = (e) => {
+    if(e.target.tagName === 'BUTTON') {
+      document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      currentView = e.target.dataset.view;
+      $('view-' + currentView).classList.add('active');
+      render();
+    }
+  };
+
+  // HELPERS
+  function getAtt(date, id) { S.att[date] = S.att[date] || {}; S.att[date][id] = S.att[date][id] || {l:false, d:false}; return S.att[date][id]; }
+  function toggleAtt(date, id, meal) { let a = getAtt(date, id); a[meal] = !a[meal]; save(); }
+  function isPaid(month, id) { return (S.pay[month] || {})[id] || false; }
+  function togglePay(month, id) { S.pay[month] = S.pay[month] || {}; S.pay[month][id] = !S.pay[month][id]; save(); }
+  function formatMonth(yyyy_mm) { const d = new Date(yyyy_mm + '-01'); return d.toLocaleString('default', { month: 'long', year: 'numeric' }); }
+  function cleanPhone(p) { let n = p.replace(/\D/g,''); return n.length === 10 ? '91' + n : n; }
+  function getMealsMonth(id, monthStr) {
+    let count = 0;
+    for(let d in S.att) { if(d.startsWith(monthStr)) { if(S.att[d][id].l) count++; if(S.att[d][id].d) count++; } }
+    return count;
+  }
+  function genWaLink(stu, monthStr) {
+    let msg = S.tpl.replace(/\{name\}/g, stu.name).replace(/\{mess\}/g, S.mess).replace(/\{month\}/g, formatMonth(monthStr)).replace(/\{fee\}/g, S.fee);
+    return `https://wa.me/${cleanPhone(stu.phone)}?text=${encodeURIComponent(msg)}`;
+  }
+
+  // RENDERING
+  function render() {
+    $('hdrName').textContent = S.mess || 'My Mess';
+    const students = S.students.sort((a,b) => a.name.localeCompare(b.name));
+
+    if (currentView === 'attendance') {
+      const date = $('attDate').value;
+      if(!date) return;
+      let lunchTot = 0, dinnerTot = 0;
+      
+      let html = students.map(st => {
+        let a = getAtt(date, st.id);
+        if(a.l) lunchTot++; if(a.d) dinnerTot++;
+        return `
+          <div class="card">
+            <div class="nm">${st.name}</div>
+            <div class="meal-toggles">
+              <button class="meal-btn ${a.l ? 'on' : ''}" onclick="window.toggleMeal('${date}','${st.id}','l')">☀️ Lunch</button>
+              <button class="meal-btn ${a.d ? 'on' : ''}" onclick="window.toggleMeal('${date}','${st.id}','d')">🌙 Dinner</button>
+            </div>
+          </div>`;
+      }).join('');
+      
+      $('attStats').innerHTML = `
+        <div><small>Lunch</small><b>${lunchTot}</b></div>
+        <div><small>Dinner</small><b>${dinnerTot}</b></div>
+        <div><small>Total</small><b>${students.length}</b></div>`;
+      $('attList').innerHTML = students.length ? html : '<div class="tip">No students added yet.</div>';
+    }
+
+    if (currentView === 'students') {
+      $('stuList').innerHTML = students.map(st => `
+        <div class="card flex-row">
+          <div><div class="nm">${st.name}</div><div class="sub">📞 ${st.phone}</div></div>
+          <button class="g" onclick="window.editStu('${st.id}')">Edit</button>
+        </div>`).join('');
+    }
+
+    if (currentView === 'payments') {
+      const m = $('payMonth').value;
+      if(!m) return;
+      
+      $('payList').innerHTML = students.map(st => {
+        let paid = isPaid(m, st.id);
+        let meals = getMealsMonth(st.id, m);
+        return `
+          <div class="card">
+            <div class="flex-row">
+              <div><div class="nm">${st.name}</div><div class="sub">Meals eaten: ${meals}</div></div>
+              <span class="chip ${paid ? 'paid' : 'unpaid'}">${paid ? 'Paid ✓' : '₹'+S.fee+' Due'}</span>
+            </div>
+            <div class="dialog-acts">
+              ${!paid && cleanPhone(st.phone) ? `<a href="${genWaLink(st, m)}" target="_blank" style="text-decoration:none"><button class="wa" style="width:100%">WhatsApp</button></a>` : ''}
+              <button class="${paid ? 'g' : 'p'}" style="${paid ? 'border:1px solid var(--bd)' : ''}" onclick="window.toggleP('${m}','${st.id}')">${paid ? 'Undo Paid' : 'Mark Paid'}</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+  }
+
+  // GLOBAL ACTIONS FOR INLINE HTML
+  window.toggleMeal = (d, id, type) => { toggleAtt(d, id, type); };
+  window.toggleP = (m, id) => { togglePay(m, id); };
+  window.editStu = (id) => {
+    editId = id;
+    let st = S.students.find(x => x.id === id);
+    $('sT').textContent = 'Edit Student';
+    $('sName').value = st.name; $('sPhone').value = st.phone;
+    $('sDel').style.display = 'block';
+    $('dStudent').showModal();
+  };
+
+  // EVENT LISTENERS
+  $('attDate').onchange = render;
+  $('payMonth').onchange = render;
+
+  $('btnAddStudent').onclick = () => {
+    editId = null; $('sT').textContent = 'Add Student';
+    $('sName').value = ''; $('sPhone').value = '';
+    $('sDel').style.display = 'none';
+    $('dStudent').showModal();
+  };
+
+  $('sCan').onclick = () => $('dStudent').close();
+  $('sSave').onclick = () => {
+    let n = $('sName').value.trim(), p = $('sPhone').value.trim();
+    if(!n) return alert("Name required");
+    if(editId) { let st = S.students.find(x => x.id === editId); st.name = n; st.phone = p; } 
+    else { S.students.push({ id: 's'+Date.now(), name: n, phone: p }); }
+    save(); $('dStudent').close();
+  };
+  $('sDel').onclick = () => {
+    if(confirm("Remove this student?")) { S.students = S.students.filter(x => x.id !== editId); save(); $('dStudent').close(); }
+  };
+
+  $('btnSettings').onclick = () => {
+    $('setMess').value = S.mess; $('setFee').value = S.fee; $('setTpl').value = S.tpl;
+    $('dSettings').showModal();
+  };
+  $('setCan').onclick = () => $('dSettings').close();
+  $('setSave').onclick = () => {
+    S.mess = $('setMess').value || 'My Mess'; S.fee = Number($('setFee').value) || 3500; S.tpl = $('setTpl').value || DEF.tpl;
+    save(); $('dSettings').close();
+  };
+
+  // CSV EXPORT LOGIC
+  $('btnExport').onclick = () => {
+    let csv = "Student Name,Phone,Total Meals Eaten All Time\n";
+    S.students.forEach(st => {
+      let meals = 0;
+      for(let d in S.att) { if(S.att[d][st.id]?.l) meals++; if(S.att[d][st.id]?.d) meals++; }
+      csv += `"${st.name}","${st.phone}",${meals}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'mess_system_export.csv';
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  // REMIND ALL LOGIC
+  $('btnRemindAll').onclick = () => {
+    const m = $('payMonth').value;
+    const unpaid = S.students.filter(st => !isPaid(m, st.id) && cleanPhone(st.phone));
+    if(unpaid.length === 0) return alert("All students are paid or missing phone numbers!");
+    
+    if(confirm(`About to open WhatsApp for ${unpaid.length} students. Please ensure your browser allows popups, or click the individual buttons instead. Proceed?`)) {
+      unpaid.forEach((st, i) => {
+        setTimeout(() => { window.open(genWaLink(st, m), '_blank'); }, i * 1500);
+      });
+    }
+  };
+</script>
+</body>
+</html>
