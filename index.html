@@ -12,12 +12,12 @@
 <style>
 /* INDIGO SAAS COLOR PALETTE */
 :root {
-  --bg: #f8fafc; /* Clean slate background */
+  --bg: #f8fafc;
   --card: #ffffff;
   --tx: #0f172a;
   --mut: #64748b;
   --bd: #e2e8f0;
-  --pri: #4f46e5; /* Professional Indigo */
+  --pri: #4f46e5;
   --pri-hov: #4338ca;
   --on: #ffffff;
   --red: #ef4444;
@@ -26,7 +26,6 @@
   --grnbg: #d1fae5;
 }
 
-/* DARK MODE SUPPORT */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0f172a; 
@@ -46,7 +45,6 @@
 html, body { margin: 0; height: 100%; }
 body { color: var(--tx); background-color: var(--bg); padding-bottom: 80px; max-width: 600px; margin: 0 auto; position: relative; }
 
-/* MODERN DOT-GRID BACKGROUND */
 body::before {
   content: "";
   position: fixed;
@@ -66,27 +64,22 @@ button.g { background: transparent; color: var(--tx); padding: 8px; border: 1px 
 button.wa { background: #25D366; color: #fff; }
 button.out { background: transparent; border: none; color: var(--mut); padding: 8px; }
 
-/* TABS NAVIGATION */
 .nav-tabs { display: flex; background: var(--card); padding: 8px; gap: 8px; border-bottom: 1px solid var(--bd); position: sticky; top: 57px; z-index: 9; }
 .nav-tabs button { flex: 1; padding: 10px 4px; background: transparent; color: var(--mut); font-size: 14px; border-radius: 8px; }
 .nav-tabs button.active { background: var(--pri); color: var(--on); }
 
-/* VIEWS */
 .view { display: none; padding: 16px; }
 .view.active { display: block; }
 
-/* CARDS & LISTS */
 .card { background: var(--card); border: 1px solid var(--bd); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
 .flex-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
 .nm { font-weight: 700; font-size: 16px; }
 .sub { color: var(--mut); font-size: 13px; margin-top: 2px; }
 
-/* ATTENDANCE TOGGLES */
 .meal-toggles { display: flex; gap: 8px; margin-top: 12px; }
 .meal-btn { flex: 1; padding: 12px; border: 2px solid var(--bd); background: transparent; color: var(--mut); border-radius: 12px; font-size: 15px; display: flex; justify-content: center; gap: 6px; align-items: center; }
 .meal-btn.on { background: var(--grnbg); border-color: var(--grn); color: var(--grn); }
 
-/* CONTROLS */
 input, select, textarea { width: 100%; font: inherit; padding: 12px; border-radius: 10px; border: 1px solid var(--bd); background: var(--bg); color: var(--tx); margin: 6px 0 16px; }
 label { font-size: 13px; font-weight: 600; color: var(--mut); text-transform: uppercase; letter-spacing: 0.5px; }
 .fab { position: fixed; right: 20px; bottom: 20px; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4); border-radius: 99px; padding: 16px 24px; font-size: 16px; z-index: 20; }
@@ -94,7 +87,6 @@ label { font-size: 13px; font-weight: 600; color: var(--mut); text-transform: up
 .chip.paid { background: var(--grnbg); color: var(--grn); }
 .chip.unpaid { background: var(--redbg); color: var(--red); }
 
-/* STATS */
 .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; text-align: center; }
 .stats div { background: var(--card); padding: 12px 4px; border-radius: 12px; border: 1px solid var(--bd); }
 .stats b { display: block; font-size: 20px; color: var(--pri); }
@@ -194,23 +186,26 @@ dialog h2 { margin: 0 0 16px; font-size: 20px; }
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+  import { initializeFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
-  // FIREBASE CONFIG - MUST MATCH YOUR SETUP
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAAegi7IJwe7sypdUJyf2RCaJ0yrekggBU",
-  authDomain: "mess-55bd6.firebaseapp.com",
-  projectId: "mess-55bd6",
-  storageBucket: "mess-55bd6.firebasestorage.app",
-  messagingSenderId: "580903581977",
-  appId: "1:580903581977:web:42d519b248db63de43ad88",
-  measurementId: "G-41MG4K5PVP"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyAAegi7IJwe7sypdUJyf2RCaJ0yrekggBU",
+    authDomain: "mess-55bd6.firebaseapp.com",
+    projectId: "mess-55bd6",
+    storageBucket: "mess-55bd6.firebasestorage.app",
+    messagingSenderId: "580903581977",
+    appId: "1:580903581977:web:42d519b248db63de43ad88",
+    measurementId: "G-41MG4K5PVP"
+  };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  const db = getFirestore(app);
+  
+  // Force long polling to prevent network/firewall 'unavailable' errors
+  const dbStandard = initializeFirestore(app, { experimentalForceLongPolling: true });
+  const dbNamedDefault = initializeFirestore(app, { experimentalForceLongPolling: true }, "default");
+  let db = dbStandard;
+
   const provider = new GoogleAuthProvider();
 
   let currentUser = null;
@@ -222,20 +217,18 @@ const firebaseConfig = {
     fee: 3500,
     tpl: 'Namaste {name}, this is a reminder from {mess}. Your mess fee for {month} (₹{fee}) is pending. Please pay at the earliest. Thank you!',
     students: [],
-    att: {}, // { "YYYY-MM-DD": { stuId: {l: true, d: false} } }
-    pay: {}  // { "YYYY-MM": { stuId: true } }
+    att: {},
+    pay: {}
   };
   let S = JSON.parse(JSON.stringify(DEF));
   
   let currentView = 'attendance';
   let editId = null;
 
-  // Set default dates
   const today = new Date();
   $('attDate').value = today.toISOString().split('T')[0];
   $('payMonth').value = today.toISOString().slice(0, 7);
 
-  // CLOUD SYNC
   async function save() {
     try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){}
     if(currentUser) {
@@ -249,24 +242,32 @@ const firebaseConfig = {
     render();
   }
 
-  // AUTHENTICATION
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       $('login-container').style.display = 'none';
       $('app-container').style.display = 'block';
       $('syncTip').textContent = "Verifying access...";
 
-      // VIP ALLOWLIST CHECK (Reads from Firestore 'allowed_emails' collection)
+      const emailKey = user.email.trim().toLowerCase();
+
       try {
-        const whitelistRef = doc(db, "allowed_emails", user.email.toLowerCase());
-        const whitelistSnap = await getDoc(whitelistRef);
+        let whitelistSnap;
+        try {
+          db = dbStandard;
+          whitelistSnap = await getDoc(doc(db, "allowed_emails", emailKey));
+        } catch (firstErr) {
+          // Automatically fallback if the database was created with the ID 'default'
+          db = dbNamedDefault;
+          whitelistSnap = await getDoc(doc(db, "allowed_emails", emailKey));
+        }
+
         if (!whitelistSnap.exists()) {
-          alert("Access Denied: " + user.email + " has not purchased access. Contact owner.");
+          alert("Access Denied: '" + emailKey + "' is not found in the 'allowed_emails' collection.");
           await signOut(auth);
           return;
         }
       } catch (err) {
-        alert("Verification failed. Make sure Firestore rules allow reading 'allowed_emails'.");
+        alert("Verification failed (" + (err.code || "error") + "): " + err.message);
         await signOut(auth);
         return;
       }
@@ -296,7 +297,6 @@ const firebaseConfig = {
   $('btnLogin').onclick = () => { signInWithPopup(auth, provider).catch(err => alert("Error: " + err.message)); };
   $('btnLogout').onclick = () => signOut(auth);
 
-  // NAVIGATION
   $('navTabs').onclick = (e) => {
     if(e.target.tagName === 'BUTTON') {
       document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
@@ -308,7 +308,6 @@ const firebaseConfig = {
     }
   };
 
-  // HELPERS
   function getAtt(date, id) { S.att[date] = S.att[date] || {}; S.att[date][id] = S.att[date][id] || {l:false, d:false}; return S.att[date][id]; }
   function toggleAtt(date, id, meal) { let a = getAtt(date, id); a[meal] = !a[meal]; save(); }
   function isPaid(month, id) { return (S.pay[month] || {})[id] || false; }
@@ -317,7 +316,7 @@ const firebaseConfig = {
   function cleanPhone(p) { let n = p.replace(/\D/g,''); return n.length === 10 ? '91' + n : n; }
   function getMealsMonth(id, monthStr) {
     let count = 0;
-    for(let d in S.att) { if(d.startsWith(monthStr)) { if(S.att[d][id].l) count++; if(S.att[d][id].d) count++; } }
+    for(let d in S.att) { if(d.startsWith(monthStr) && S.att[d][id]) { if(S.att[d][id].l) count++; if(S.att[d][id].d) count++; } }
     return count;
   }
   function genWaLink(stu, monthStr) {
@@ -325,7 +324,6 @@ const firebaseConfig = {
     return `https://wa.me/${cleanPhone(stu.phone)}?text=${encodeURIComponent(msg)}`;
   }
 
-  // RENDERING
   function render() {
     $('hdrName').textContent = S.mess || 'My Mess';
     const students = S.students.sort((a,b) => a.name.localeCompare(b.name));
@@ -385,7 +383,6 @@ const firebaseConfig = {
     }
   }
 
-  // GLOBAL ACTIONS FOR INLINE HTML
   window.toggleMeal = (d, id, type) => { toggleAtt(d, id, type); };
   window.toggleP = (m, id) => { togglePay(m, id); };
   window.editStu = (id) => {
@@ -397,7 +394,6 @@ const firebaseConfig = {
     $('dStudent').showModal();
   };
 
-  // EVENT LISTENERS
   $('attDate').onchange = render;
   $('payMonth').onchange = render;
 
@@ -430,7 +426,6 @@ const firebaseConfig = {
     save(); $('dSettings').close();
   };
 
-  // CSV EXPORT LOGIC
   $('btnExport').onclick = () => {
     let csv = "Student Name,Phone,Total Meals Eaten All Time\n";
     S.students.forEach(st => {
@@ -444,7 +439,6 @@ const firebaseConfig = {
     a.click(); URL.revokeObjectURL(url);
   };
 
-  // REMIND ALL LOGIC
   $('btnRemindAll').onclick = () => {
     const m = $('payMonth').value;
     const unpaid = S.students.filter(st => !isPaid(m, st.id) && cleanPhone(st.phone));
